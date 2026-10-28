@@ -114,9 +114,12 @@ void ConfigureServices(IServiceCollection services, IConfiguration config)
 {
     logger.LogInformation("Program // ConfigureServices");
 
+    // The environment variable detector comes last so that OTEL_SERVICE_NAME and
+    // OTEL_RESOURCE_ATTRIBUTES take precedence over the hard-coded service name.
     services.AddOpenTelemetry()
-        .ConfigureResource(r =>
-            r.AddService(serviceName: Telemetry.AppName, serviceInstanceId: Environment.MachineName))
+        .ConfigureResource(r => r
+            .AddService(serviceName: Telemetry.AppName, serviceInstanceId: Environment.MachineName)
+            .AddEnvironmentVariableDetector())
         .WithMetrics(metrics =>
         {
             metrics.AddAspNetCoreInstrumentation();
